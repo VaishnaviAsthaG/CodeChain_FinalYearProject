@@ -52,7 +52,7 @@ function Dashboard() {
         <div className="stats-grid">
           <div className="stat-card">
             <p>Total Tokens</p>
-            <h2>{user.tokens} CC</h2>
+            <h2>{user.tokens} CCT</h2>
           </div>
 
           <div className="stat-card">
