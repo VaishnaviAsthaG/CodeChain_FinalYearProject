@@ -146,4 +146,31 @@ router.put("/connect-wallet", async (req, res) => {
   }
 });
 
+router.put("/connect-wallet", async (req, res) => {
+  try {
+    const token = req.headers.authorization?.split(" ")[1];
+
+    if (!token) {
+      return res.status(401).json({ message: "No token provided" });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const { walletAddress } = req.body;
+
+    const user = await User.findByIdAndUpdate(
+      decoded.id,
+      { walletAddress },
+      { new: true }
+    ).select("-password");
+
+    res.json({
+      message: "Wallet connected successfully",
+      user,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+
 module.exports = router;

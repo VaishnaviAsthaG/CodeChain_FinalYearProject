@@ -1,3 +1,5 @@
+const transferCCT = require("../services/tokenService");
+
 const express = require("express");
 const jwt = require("jsonwebtoken");
 const Submission = require("../models/Submission");
@@ -23,6 +25,54 @@ const auth = async (req, res, next) => {
 };
 
 // SUBMIT CODE
+// router.post("/submit", auth, async (req, res) => {
+//   try {
+//     const { problemId, code, language } = req.body;
+
+//     const problem = await Problem.findById(problemId);
+
+//     if (!problem) {
+//       return res.status(404).json({ message: "Problem not found" });
+//     }
+
+//     // Demo logic:
+//     // If user code contains expected output, Accepted.
+//     // Otherwise Wrong Answer.
+//     const isAccepted = code.includes(problem.expectedOutput);
+
+//     const verdict = isAccepted ? "Accepted" : "Wrong Answer";
+//     const rewardGiven = isAccepted ? problem.reward : 0;
+
+//     const submission = await Submission.create({
+//       user: req.userId,
+//       problem: problem._id,
+//       code,
+//       language,
+//       verdict,
+//       rewardGiven,
+//     });
+
+//     if (isAccepted) {
+//       await User.findByIdAndUpdate(req.userId, {
+//         $inc: {
+//           tokens: rewardGiven,
+//           problemsSolved: 1,
+//         },
+//       });
+//     }
+
+//     res.json({
+//       message: isAccepted
+//         ? "Submission successfully verified. Reward claimed."
+//         : "Your output did not match the expected output.",
+//       verdict,
+//       rewardGiven,
+//       submissionId: submission._id,
+//     });
+//   } catch (error) {
+//     res.status(500).json({ message: error.message });
+//   }
+// });
 router.post("/submit", auth, async (req, res) => {
   try {
     const { problemId, code, language } = req.body;
@@ -33,24 +83,24 @@ router.post("/submit", auth, async (req, res) => {
       return res.status(404).json({ message: "Problem not found" });
     }
 
-    // Demo logic:
-    // If user code contains expected output, Accepted.
-    // Otherwise Wrong Answer.
     const isAccepted = code.includes(problem.expectedOutput);
 
     const verdict = isAccepted ? "Accepted" : "Wrong Answer";
     const rewardGiven = isAccepted ? problem.reward : 0;
 
-    const submission = await Submission.create({
-      user: req.userId,
-      problem: problem._id,
-      code,
-      language,
-      verdict,
-      rewardGiven,
-    });
+    let txHash = "";
 
     if (isAccepted) {
+      const user = await User.findById(req.userId);
+
+      if (!user.walletAddress) {
+        return res.status(400).json({
+          message: "Please connect MetaMask wallet before claiming reward.",
+        });
+      }
+
+      txHash = await transferCCT(user.walletAddress, rewardGiven);
+
       await User.findByIdAndUpdate(req.userId, {
         $inc: {
           tokens: rewardGiven,
@@ -59,16 +109,29 @@ router.post("/submit", auth, async (req, res) => {
       });
     }
 
+    const submission = await Submission.create({
+      user: req.userId,
+      problem: problem._id,
+      code,
+      language,
+      verdict,
+      rewardGiven,
+      txHash,
+    });
+
     res.json({
       message: isAccepted
-        ? "Submission successfully verified. Reward claimed."
+        ? "Submission verified. CCT token transferred to your MetaMask wallet."
         : "Your output did not match the expected output.",
       verdict,
       rewardGiven,
+      txHash,
       submissionId: submission._id,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({
+      message: error.message,
+    });
   }
 });
 
