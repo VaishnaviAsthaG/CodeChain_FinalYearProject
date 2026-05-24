@@ -9,8 +9,15 @@ function ProblemDetails() {
 
   const [problem, setProblem] = useState(null);
   const [code, setCode] = useState("");
+  const [language, setLanguage] = useState("javascript");
+const [output, setOutput] = useState("");
+const [running, setRunning] = useState(false);
+const [seconds, setSeconds] = useState(0);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
+  const [timerActive, setTimerActive] = useState(false);
+  const [showProcessing, setShowProcessing] = useState(false);
+const [processingStep, setProcessingStep] = useState(1);
 
   const fetchProblem = async () => {
     try {
@@ -25,27 +32,110 @@ function ProblemDetails() {
     fetchProblem();
   }, []);
 
-  const handleSubmit = async () => {
-    try {
-      setLoading(true);
+//   useEffect(() => {
+//   const timer = setInterval(() => {
+//     setSeconds((prev) => prev + 1);
+//   }, 1000);
 
-    //   const { data } = await API.post("/submissions", {
-    //     problemId: id,
-    //     code,
-    //   });
+//   return () => clearInterval(timer);
+// }, []);
+
+useEffect(() => {
+  let timer;
+
+  if (timerActive) {
+    timer = setInterval(() => {
+      setSeconds((prev) => prev + 1);
+    }, 1000);
+  }
+
+  return () => clearInterval(timer);
+}, [timerActive]);
+
+const handleRun = async () => {
+  try {
+    setRunning(true);
+
+    // temporary fake output
+    setTimeout(() => {
+      setOutput("Code executed successfully");
+      setRunning(false);
+    }, 1200);
+
+  } catch (error) {
+    setOutput("Execution failed");
+    setRunning(false);
+  }
+};
+
+//   const handleSubmit = async () => {
+//     setShowProcessing(true);
+// setProcessingStep(1);
+//     try {
+//       setLoading(true);
+
+//     //   const { data } = await API.post("/submissions", {
+//     //     problemId: id,
+//     //     code,
+//     //   });
+//     setTimeout(() => {
+//   setProcessingStep(2);
+// }, 1200);
+
+// setTimeout(() => {
+//   setProcessingStep(3);
+// }, 2500);
+//     const { data } = await API.post("/submissions/submit", {
+//   problemId: id,
+//   code,
+//   language,
+// });
+
+//       setResult(data);
+//     } catch (error) {
+//       alert(error.response?.data?.message || "Submission failed");
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+const handleSubmit = async () => {
+  try {
+    setLoading(true);
+    setResult(null);
+
+    setShowProcessing(true);
+    setProcessingStep(1);
+
+    setSeconds(0);
+    setTimerActive(true);
+
+    setTimeout(() => {
+      setProcessingStep(2);
+    }, 1200);
+
+    setTimeout(() => {
+      setProcessingStep(3);
+    }, 2500);
+
     const { data } = await API.post("/submissions/submit", {
-  problemId: id,
-  code,
-  language: "javascript",
-});
+      problemId: id,
+      code,
+      language,
+    });
 
-      setResult(data);
-    } catch (error) {
-      alert(error.response?.data?.message || "Submission failed");
-    } finally {
-      setLoading(false);
-    }
-  };
+    setResult(data);
+
+    setTimeout(() => {
+      setShowProcessing(false);
+    }, 1200);
+  } catch (error) {
+    setShowProcessing(false);
+    alert(error.response?.data?.message || "Submission failed");
+  } finally {
+    setLoading(false);
+    setTimerActive(false);
+  }
+};
 
   if (!problem) return <div className="page">Loading...</div>;
 
@@ -94,15 +184,47 @@ function ProblemDetails() {
 
         {/* RIGHT */}
         <div className="problem-right">
-          <div className="editor-header">
+          {/* <div className="editor-header">
             <span>Python</span>
-          </div>
+          </div> */}
+
+          <div className="editor-header">
+  <div className="editor-left">
+    <select
+      value={language}
+      onChange={(e) => setLanguage(e.target.value)}
+    >
+      <option value="javascript">JavaScript</option>
+      <option value="python">Python</option>
+      <option value="cpp">C++</option>
+      <option value="java">Java</option>
+    </select>
+
+    <span className="timer-box">
+      ⏱ {seconds}s
+    </span>
+  </div>
+
+  <div className="editor-right">
+    <button className="run-btn" onClick={handleRun}>
+      {running ? "Running..." : "Run Code"}
+    </button>
+  </div>
+</div>
 
           <textarea
             placeholder="Write your solution here..."
             value={code}
             onChange={(e) => setCode(e.target.value)}
           />
+
+          <div className="output-box">
+  <h3>Output Console</h3>
+
+  <pre>
+    {output || "Run your code to see output"}
+  </pre>
+</div>
 
           <button
             className="submit-btn"
@@ -111,7 +233,7 @@ function ProblemDetails() {
             {loading ? "Submitting..." : "Submit Solution"}
           </button>
 
-          {result && (
+          {/* {result && (
             <div
               className={
                 result.verdict === "Accepted"
@@ -122,12 +244,144 @@ function ProblemDetails() {
              <h2>{result.verdict}</h2>
 <p>{result.message}</p>
 <h3>{result.rewardGiven} CCT Earned</h3>
+
+
             </div>
-          )}
+            {showProcessing && (
+  <div className="processing-overlay">
+
+    <div className="processing-card">
+
+      <div className="rocket-circle">
+        🚀
+      </div>
+
+      <h1>Processing Submission</h1>
+
+      <p>
+        Deploying your solution to the decentralized judge...
+      </p>
+
+      <div className="process-list">
+
+        <div className={`process-item ${processingStep >= 1 ? "active" : ""}`}>
+          <span>✓</span>
+
+          <div>
+            <h4>Compiling Code...</h4>
+            <small>Target: LLVM WebAssembly VM</small>
+          </div>
+        </div>
+
+        <div className={`process-item ${processingStep >= 2 ? "active" : ""}`}>
+          <span>{"</>"}</span>
+
+          <div>
+            <h4>Running Test Cases...</h4>
+
+            {processingStep >= 2 && (
+              <div className="progress-bar">
+                <div className="progress-fill"></div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className={`process-item ${processingStep >= 3 ? "active" : ""}`}>
+          <span>⬢</span>
+
+          <div>
+            <h4>Minting Reward Token...</h4>
+            <small>Waiting for blockchain confirmation...</small>
+          </div>
+        </div>
+
+      </div>
+
+      <div className="pro-tip">
+        💡 PRO TIP
+      </div>
+
+      <p className="tip-text">
+        Use optimal time complexity solutions for faster execution.
+      </p>
+
+    </div>
+
+  </div>
+)} */}
+
+{result && (
+  <div
+    className={
+      result.verdict === "Accepted"
+        ? "success-box"
+        : "fail-box"
+    }
+  >
+    <h2>{result.verdict}</h2>
+    <p>{result.message}</p>
+    <h3>{result.rewardGiven} CCT Earned</h3>
+  </div>
+)}
+
+{showProcessing && (
+  <div className="processing-overlay">
+    <div className="processing-card">
+      <div className="rocket-circle">🚀</div>
+
+      <h1>Processing Submission</h1>
+
+      <p>Deploying your solution to the decentralized judge...</p>
+
+      <div className="process-list">
+        <div className={`process-item ${processingStep >= 1 ? "active" : ""}`}>
+          <span>✓</span>
+
+          <div>
+            <h4>Compiling Code...</h4>
+            <small>Target: LLVM WebAssembly VM</small>
+          </div>
+        </div>
+
+        <div className={`process-item ${processingStep >= 2 ? "active" : ""}`}>
+          <span>{"</>"}</span>
+
+          <div>
+            <h4>Running Test Cases...</h4>
+
+            {processingStep >= 2 && (
+              <div className="progress-bar">
+                <div className="progress-fill"></div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className={`process-item ${processingStep >= 3 ? "active" : ""}`}>
+          <span>⬢</span>
+
+          <div>
+            <h4>Minting Reward Token...</h4>
+            <small>Waiting for blockchain confirmation...</small>
+          </div>
+        </div>
+      </div>
+
+      <div className="pro-tip">💡 PRO TIP</div>
+
+      <p className="tip-text">
+        Use optimal time complexity solutions for faster execution.
+      </p>
+    </div>
+  </div>
+)}
+          
         </div>
       </div>
     </div>
   );
 }
+
 
 export default ProblemDetails;
