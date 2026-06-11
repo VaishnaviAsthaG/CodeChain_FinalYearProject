@@ -2347,3 +2347,125 @@ footer {
   color: #22c55e;
   border: 1px solid rgba(34, 197, 94, 0.35);
 }
+
+.problems-content {
+  width: min(1200px, 92%);
+  margin: 42px auto;
+}
+
+.problems-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 28px;
+}
+
+.problems-header h1 {
+  font-size: 44px;
+  margin-bottom: 8px;
+}
+
+.problems-count-card {
+  background: #111827;
+  border: 1px solid #2b3b52;
+  border-radius: 18px;
+  padding: 20px 28px;
+  text-align: center;
+}
+
+.problems-count-card span {
+  color: #94a3b8;
+  font-weight: 800;
+  font-size: 13px;
+}
+
+.problems-count-card h2 {
+  font-size: 34px;
+  margin-top: 8px;
+}
+
+.problem-filters {
+  display: grid;
+  grid-template-columns: 1.5fr 0.6fr 0.8fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.problem-filters input,
+.problem-filters select {
+  background: #111827;
+  color: white;
+  border: 1px solid #334155;
+  border-radius: 12px;
+  padding: 14px 16px;
+  outline: none;
+}
+
+.category-tabs {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 14px;
+  margin-bottom: 28px;
+}
+
+.category-tabs button {
+  white-space: nowrap;
+  background: #111827;
+  color: #cbd5e1;
+  border: 1px solid #334155;
+  border-radius: 999px;
+  padding: 11px 16px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.category-tabs button span {
+  margin-left: 8px;
+  background: #1e293b;
+  color: #93c5fd;
+  padding: 3px 8px;
+  border-radius: 999px;
+}
+
+.category-tabs .active-category {
+  background: #e5e7eb;
+  color: #0f172a;
+}
+
+.category-title-row {
+  background: #202938;
+  border: 1px solid #334155;
+  border-bottom: none;
+  border-radius: 16px 16px 0 0;
+  padding: 14px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.category-title-row h2 {
+  font-size: 18px;
+}
+
+.category-title-row span {
+  color: #94a3b8;
+  font-weight: 800;
+}
+
+.category-section {
+  margin-bottom: 28px;
+}
+
+.leetcode-table {
+  border-radius: 0 0 16px 16px;
+}
+
+.empty-problems {
+  background: #111827;
+  border: 1px solid #334155;
+  border-radius: 18px;
+  padding: 40px;
+  text-align: center;
+  color: #94a3b8;
+}

@@ -4,3 +4,5 @@ dist
 build
 coverage
 .DS_Store
+.env.exmaple
+frontend/node_modules

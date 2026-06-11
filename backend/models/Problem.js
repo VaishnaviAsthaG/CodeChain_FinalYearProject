@@ -18,6 +18,11 @@ const problemSchema = new mongoose.Schema(
       default: "Easy",
     },
 
+    category: {
+  type: String,
+  default: "Array",
+},
+
     inputExample: {
       type: String,
       required: true,
@@ -57,6 +62,7 @@ const problemSchema = new mongoose.Schema(
       default: 10,
     },
   },
+
 
   { timestamps: true }
 );

@@ -532,7 +532,7 @@ const hardProblems = problems.filter((p) => p.difficulty === "Hard").length;
   return (
     <div className="page">
       <nav className="app-nav">
-        <h2>▣ CodeChain Admin</h2>
+        <h2>✦ CodeChain Admin</h2>
         <div>
           <button onClick={() => navigate("/dashboard")}>Dashboard</button>
           <button onClick={() => navigate("/problems")}>Problems</button>
