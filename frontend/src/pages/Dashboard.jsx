@@ -137,7 +137,7 @@ function Dashboard() {
   return (
     <div className="page">
       <nav className="app-nav">
-        <h2>▣ CodeChain</h2>
+        <h2>✦ CodeChain</h2>
 
         <div>
           <button onClick={() => navigate("/problems")}>Problems</button>

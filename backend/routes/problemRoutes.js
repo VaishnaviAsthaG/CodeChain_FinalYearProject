@@ -216,6 +216,7 @@ router.post("/add", adminAuth, async (req, res) => {
       title,
       description,
       difficulty,
+      category,
       inputExample,
       outputExample,
       expectedOutput,
@@ -248,6 +249,51 @@ router.post("/add", adminAuth, async (req, res) => {
     res.status(201).json({
       message: "Problem added successfully",
       problem,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+});
+
+// BULK ADD PROBLEMS
+router.post("/bulk-add", adminAuth, async (req, res) => {
+  try {
+    const { problems } = req.body;
+
+    if (!problems || !Array.isArray(problems) || problems.length === 0) {
+      return res.status(400).json({
+        message: "Problems array is required",
+      });
+    }
+
+    const formattedProblems = problems.map((problem) => ({
+      title: problem.title,
+      description: problem.description,
+      difficulty: problem.difficulty || "Easy",
+      category: problem.category || "Array",
+      inputExample: problem.inputExample,
+      outputExample: problem.outputExample,
+      expectedOutput: problem.expectedOutput,
+      reward: Number(problem.reward) || 50,
+      testCases:
+        problem.testCases && problem.testCases.length > 0
+          ? problem.testCases
+          : [
+              {
+                input: problem.inputExample || "",
+                expectedOutput: problem.expectedOutput,
+                isHidden: false,
+              },
+            ],
+    }));
+
+    const insertedProblems = await Problem.insertMany(formattedProblems);
+
+    res.status(201).json({
+      message: `${insertedProblems.length} problems added successfully`,
+      insertedProblems,
     });
   } catch (error) {
     res.status(500).json({
