@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../api/api";
 import "../index.css";
+import { signInWithPopup } from "firebase/auth";
+import { auth, googleProvider } from "../firebase";
 
 function Login() {
   const navigate = useNavigate();
@@ -13,12 +15,41 @@ function Login() {
     password: "",
   });
 
+  const [message, setMessage] = useState("");
+const [messageType, setMessageType] = useState("");
+
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!form.email || !form.password) {
+  setMessage("Email and password are required");
+setMessageType("error");
+  return;
+}
+
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+if (!emailRegex.test(form.email)) {
+  setMessage("Please enter a valid email address");
+setMessageType("error");
+  return;
+}
+
+if (isSignup && !form.name.trim()) {
+  setMessage("Name is required");
+setMessageType("error");
+  return;
+}
+
+if (form.password.length < 6) {
+  setMessage("Password must be at least 6 characters long");
+setMessageType("error");
+  return;
+}
 
     try {
       const endpoint = isSignup ? "/auth/register" : "/auth/login";
@@ -28,12 +59,42 @@ function Login() {
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
 
-      alert(isSignup ? "Signup successful" : "Login successful");
+      setMessage(isSignup ? "Signup successful" : "Login successful");
+setMessageType("success");
       navigate("/dashboard");
     } catch (error) {
       alert(error.response?.data?.message || "Something went wrong");
     }
   };
+
+  const handleGoogleLogin = async () => {
+  try {
+    setMessage("");
+    setMessageType("");
+
+    const result = await signInWithPopup(auth, googleProvider);
+
+    const googleUser = result.user;
+
+    const { data } = await API.post("/auth/google-login", {
+      name: googleUser.displayName,
+      email: googleUser.email,
+      photoURL: googleUser.photoURL,
+    });
+
+    localStorage.setItem("token", data.token);
+    localStorage.setItem("user", JSON.stringify(data.user));
+
+    setMessage("Google login successful");
+    setMessageType("success");
+
+    navigate("/dashboard");
+  } catch (error) {
+    console.log(error);
+    setMessage("Google login failed");
+    setMessageType("error");
+  }
+};
 
   return (
     <div className="login-page">
@@ -53,7 +114,13 @@ function Login() {
         <h1>{isSignup ? "Create Account" : "Welcome back"}</h1>
         <p>Master DSA on the decentralized web</p>
 
-        <button className="wallet-btn">SIGN UP WITH GOOGLE</button>
+        <button
+  type="button"
+  className="wallet-btn"
+  onClick={handleGoogleLogin}
+>
+  SIGN IN WITH GOOGLE
+</button>
 
         <div className="divider">
           <span></span>
@@ -61,6 +128,11 @@ function Login() {
           <span></span>
         </div>
 
+      {message && (
+  <div className={`auth-message ${messageType}`}>
+    {message}
+  </div>
+)}
         <form onSubmit={handleSubmit}>
           {isSignup && (
             <>
@@ -100,7 +172,7 @@ function Login() {
             <span>
               <input type="checkbox" /> Keep me logged in
             </span>
-            <a>Forgot?</a>
+            <a onClick={() => navigate("/forgot-password")}>Forgot Password?</a>
           </div>
 
           <button type="submit" className="signin-btn">

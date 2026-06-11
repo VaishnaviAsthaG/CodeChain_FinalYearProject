@@ -15,6 +15,11 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    role: {
+  type: String,
+  enum: ["user", "admin"],
+  default: "user",
+},
     walletAddress: {
       type: String,
       default: "",
@@ -27,6 +32,46 @@ const userSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+currentStreak: {
+  type: Number,
+  default: 0,
+},
+
+longestStreak: {
+  type: Number,
+  default: 0,
+},
+
+lastSolvedDate: {
+  type: Date,
+  default: null,
+},
+
+xp: {
+  type: Number,
+  default: 0,
+},
+
+level: {
+  type: Number,
+  default: 1,
+},
+
+photoURL: {
+  type: String,
+  default: "",
+},
+
+resetOtp: {
+  type: String,
+  default: "",
+},
+
+resetOtpExpiry: {
+  type: Date,
+  default: null,
+},
+
   },
   { timestamps: true }
 );

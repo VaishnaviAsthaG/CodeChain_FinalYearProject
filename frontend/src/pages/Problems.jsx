@@ -17,9 +17,27 @@ function Problems() {
     }
   };
 
-  useEffect(() => {
-    fetchProblems();
-  }, []);
+const [solvedIds, setSolvedIds] = useState([]);
+
+const fetchSolvedProblems = async () => {
+  try {
+    const { data } = await API.get("/submissions/my");
+
+    const acceptedProblemIds = data
+      .filter((item) => item.verdict === "Accepted")
+      .map((item) => item.problem?._id);
+
+    setSolvedIds(acceptedProblemIds);
+  } catch (error) {
+    console.log(error);
+  }
+};
+  
+
+ useEffect(() => {
+  fetchProblems();
+  fetchSolvedProblems();
+}, []);
 
   return (
     <div className="page">
@@ -44,26 +62,32 @@ function Problems() {
             <span>ACTION</span>
           </div>
 
-          {problems.map((problem) => (
-            <div className="table-row" key={problem._id}>
-              <span>○</span>
+          {problems.map((problem) => {
+  const isSolved = solvedIds.includes(problem._id);
 
-              <span>
-                <b>{problem.title}</b>
-                <small>{problem.description.slice(0, 45)}...</small>
-              </span>
+  return (
+    <div className="table-row" key={problem._id}>
+      <span className={isSolved ? "solved-status" : "unsolved-status"}>
+        {isSolved ? "✓" : "○"}
+      </span>
 
-              <span className={`badge ${problem.difficulty.toLowerCase()}`}>
-                {problem.difficulty}
-              </span>
+      <span>
+        <b>{problem.title}</b>
+        <small>{problem.description.slice(0, 45)}...</small>
+      </span>
 
-              <span>{problem.reward} CC</span>
+      <span className={`badge ${problem.difficulty.toLowerCase()}`}>
+        {problem.difficulty}
+      </span>
 
-              <button onClick={() => navigate(`/problems/${problem._id}`)}>
-                ▷ Solve
-              </button>
-            </div>
-          ))}
+      <span>{problem.reward} CCT</span>
+
+      <button onClick={() => navigate(`/problems/${problem._id}`)}>
+        {isSolved ? "View / Retry" : "▷ Solve"}
+      </button>
+    </div>
+  );
+})}
         </div>
       </section>
     </div>
