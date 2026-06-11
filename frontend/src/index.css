@@ -510,7 +510,7 @@ footer {
   padding: 18px;
   border-radius: 10px;
 }
-//submission histry
+/* //submission histry */
 .submission-head,
 .submission-row {
   grid-template-columns: 1.6fr 160px 140px 160px 240px;
@@ -534,7 +534,7 @@ footer {
   font-weight: 800;
 }
 
-//leaderboard
+/* //leaderboard */
 .leaderboard-head,
 .leaderboard-row {
   grid-template-columns: 120px 1.8fr 180px 220px 140px;
@@ -546,7 +546,7 @@ footer {
   color: #58a6ff;
 }
 
-//dashboard
+/* //dashboard */
 .dashboard-content {
   padding: 50px 70px;
 }
@@ -602,7 +602,7 @@ footer {
   font-size: 30px;
 }
 
-//wallet
+/* //wallet */
 .wallet-content {
   padding: 50px 70px;
 }
@@ -834,7 +834,7 @@ footer {
   border: 1px solid #ef4444;
 }
 
-//admin
+/* //admin */
 .admin-content {
   padding: 50px 70px;
 }
@@ -900,7 +900,7 @@ footer {
   cursor: pointer;
 }
 
-//landing page 
+/* //landing page  */
 .landing-page {
   min-height: 100vh;
   background:
