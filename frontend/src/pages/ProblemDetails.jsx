@@ -8,8 +8,26 @@ function ProblemDetails() {
   const navigate = useNavigate();
 
   const [problem, setProblem] = useState(null);
-  const [code, setCode] = useState("");
-  const [language, setLanguage] = useState("javascript");
+
+const starterCodes = {
+  javascript: `console.log("[0,1]");`,
+  python: `print("[0,1]")`,
+  cpp: `#include <iostream>
+using namespace std;
+
+int main() {
+    cout << "[0,1]";
+    return 0;
+}`,
+  java: `public class Main {
+    public static void main(String[] args) {
+        System.out.println("[0,1]");
+    }
+}`
+};
+
+const [code, setCode] = useState(starterCodes.javascript);
+const [language, setLanguage] = useState("javascript");
 const [output, setOutput] = useState("");
 const [running, setRunning] = useState(false);
 const [seconds, setSeconds] = useState(0);
@@ -52,20 +70,53 @@ useEffect(() => {
   return () => clearInterval(timer);
 }, [timerActive]);
 
+// const handleRun = async () => {
+//   try {
+//     setRunning(true);
+
+//     // temporary fake output
+//     setTimeout(() => {
+//       setOutput("Code executed successfully");
+//       setRunning(false);
+//     }, 1200);
+
+//   } catch (error) {
+//     setOutput("Execution failed");
+//     setRunning(false);
+//   }
+// };
+
 const handleRun = async () => {
   try {
     setRunning(true);
+    setOutput("");
+    setSeconds(0);
+    setTimerActive(true);
 
-    // temporary fake output
-    setTimeout(() => {
-      setOutput("Code executed successfully");
-      setRunning(false);
-    }, 1200);
+    const { data } = await API.post("/submissions/run", {
+      code,
+      language,
+      stdin: "",
+    });
 
+    if (data.error) {
+      setOutput(data.error);
+    } else {
+      setOutput(data.output || "No output");
+    }
   } catch (error) {
-    setOutput("Execution failed");
+    setOutput(error.response?.data?.message || "Execution failed");
+  } finally {
     setRunning(false);
+    setTimerActive(false);
   }
+};
+
+const handleLanguageChange = (e) => {
+  const selectedLanguage = e.target.value;
+
+  setLanguage(selectedLanguage);
+  setCode(starterCodes[selectedLanguage]);
 };
 
 //   const handleSubmit = async () => {
@@ -192,7 +243,7 @@ const handleSubmit = async () => {
   <div className="editor-left">
     <select
       value={language}
-      onChange={(e) => setLanguage(e.target.value)}
+      onChange={handleLanguageChange}
     >
       <option value="javascript">JavaScript</option>
       <option value="python">Python</option>
@@ -211,6 +262,22 @@ const handleSubmit = async () => {
     </button>
   </div>
 </div>
+
+{/* <div className="language-bar">
+
+  <label>Language</label>
+
+  <select
+    value={language}
+    onChange={handleLanguageChange}
+  >
+    <option value="javascript">JavaScript</option>
+    <option value="python">Python</option>
+    <option value="cpp">C++</option>
+    <option value="java">Java</option>
+  </select>
+
+</div> */}
 
           <textarea
             placeholder="Write your solution here..."
@@ -310,18 +377,70 @@ const handleSubmit = async () => {
 
   </div>
 )} */}
+{result && result.verdict === "Accepted" && (
+  <div className="success-result-card">
+    <div className="success-top">
+      <div className="success-icon">✓</div>
+      <h1>All Test Cases Passed</h1>
+      <p>Submission successfully verified on-chain</p>
+    </div>
 
-{result && (
-  <div
-    className={
-      result.verdict === "Accepted"
-        ? "success-box"
-        : "fail-box"
-    }
-  >
-    <h2>{result.verdict}</h2>
+    <div className="success-bottom">
+      <p className="reward-label">REWARD CLAIMED</p>
+      <h2>
+  {result.rewardGiven > 0
+    ? `${result.rewardGiven} CCT Minted`
+    : "Reward Already Claimed"}
+</h2>
+<p>{result.message}</p>
+
+      {result.txHash && (
+        <div className="tx-box">
+          <span>TRANSACTION HASH</span>
+          <p>
+            {result.txHash.slice(0, 12)}...
+            {result.txHash.slice(-8)}
+          </p>
+        </div>
+      )}
+
+      <div className="success-actions">
+        {result.txHash && (
+          <a
+            href={`https://amoy.polygonscan.com/tx/${result.txHash}`}
+            target="_blank"
+            rel="noreferrer"
+          >
+            View on PolygonScan
+          </a>
+        )}
+
+        <button onClick={() => navigate("/problems")}>
+          Next Problem →
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
+{result && result.verdict !== "Accepted" && (
+  <div className="wrong-result-card">
+    <h1>Wrong Answer</h1>
     <p>{result.message}</p>
-    <h3>{result.rewardGiven} CCT Earned</h3>
+
+    <div className="diff-grid">
+      <div>
+        <span>EXPECTED OUTPUT</span>
+        <h3>{result.expectedOutput || problem.expectedOutput}</h3>
+      </div>
+
+      <div>
+        <span>YOUR OUTPUT</span>
+        <h3>{result.output || output || "Incorrect Output"}</h3>
+      </div>
+    </div>
+
+    <button onClick={() => setResult(null)}>Try Again</button>
   </div>
 )}
 

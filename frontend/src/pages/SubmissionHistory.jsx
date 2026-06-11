@@ -37,12 +37,13 @@ function SubmissionHistory() {
 
         <div className="problem-table">
           <div className="table-head submission-head">
-            <span>PROBLEM</span>
-            <span>STATUS</span>
-            <span>TOKENS</span>
-            <span>LANGUAGE</span>
-            <span>DATE</span>
-          </div>
+  <span>PROBLEM</span>
+  <span>STATUS</span>
+  <span>TOKENS</span>
+  <span>LANGUAGE</span>
+  <span>TX HASH</span>
+  <span>DATE</span>
+</div>
 
           {submissions.map((item) => (
             <div className="table-row submission-row" key={item._id}>
@@ -55,9 +56,26 @@ function SubmissionHistory() {
                 {item.verdict === "Accepted" ? "● PASS" : "● FAIL"}
               </span>
 
-              <span>{item.rewardGiven} CC</span>
-              <span>{item.language}</span>
-              <span>{new Date(item.createdAt).toLocaleString()}</span>
+              <span>{item.rewardGiven} CCT</span>
+
+<span>{item.language}</span>
+
+<span>
+  {item.txHash ? (
+    <a
+      href={`https://amoy.polygonscan.com/tx/${item.txHash}`}
+      target="_blank"
+      rel="noreferrer"
+      className="tx-link"
+    >
+      View Tx
+    </a>
+  ) : (
+    "—"
+  )}
+</span>
+
+<span>{new Date(item.createdAt).toLocaleString()}</span>
             </div>
           ))}
         </div>

@@ -114,6 +114,7 @@
 
 const express = require("express");
 const Problem = require("../models/Problem");
+const adminAuth = require("../middleware/adminAuth");
 
 const router = express.Router();
 
@@ -166,7 +167,50 @@ router.get("/seed", async (req, res) => {
 });
 
 // ADD NEW PROBLEM
-router.post("/add", async (req, res) => {
+// router.post("/add", async (req, res) => {
+//   try {
+//     const {
+//         title,
+//   description,
+//   difficulty,
+//   inputExample,
+//   outputExample,
+//   expectedOutput,
+//   reward,
+//   testCases,
+//     } = req.body;
+
+//     const problem = await Problem.create({
+//       title,
+//       description,
+//       difficulty,
+//       inputExample,
+//       outputExample,
+//       expectedOutput,
+//       reward: Number(reward),
+//       testCases: testCases && testCases.length > 0
+//   ? testCases
+//   : [
+//       {
+//         input: "",
+//         expectedOutput,
+//         isHidden: false,
+//       },
+//     ],
+//     });
+
+//     res.status(201).json({
+//       message: "Problem added successfully",
+//       problem,
+//     });
+//   } catch (error) {
+//     res.status(500).json({
+//       message: error.message,
+//     });
+//   }
+// });
+
+router.post("/add", adminAuth, async (req, res) => {
   try {
     const {
       title,
@@ -176,7 +220,19 @@ router.post("/add", async (req, res) => {
       outputExample,
       expectedOutput,
       reward,
+      testCases,
     } = req.body;
+
+    const finalTestCases =
+      testCases && testCases.length > 0
+        ? testCases
+        : [
+            {
+              input: "",
+              expectedOutput,
+              isHidden: false,
+            },
+          ];
 
     const problem = await Problem.create({
       title,
@@ -186,6 +242,7 @@ router.post("/add", async (req, res) => {
       outputExample,
       expectedOutput,
       reward: Number(reward),
+      testCases: finalTestCases,
     });
 
     res.status(201).json({
@@ -206,6 +263,57 @@ router.get("/", async (req, res) => {
     res.json(problems);
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+});
+
+
+// UPDATE PROBLEM
+router.put("/:id", adminAuth, async (req, res) => {
+  try {
+    const updatedProblem = await Problem.findByIdAndUpdate(
+      req.params.id,
+      {
+        ...req.body,
+        reward: Number(req.body.reward),
+      },
+      { new: true }
+    );
+
+    if (!updatedProblem) {
+      return res.status(404).json({
+        message: "Problem not found",
+      });
+    }
+
+    res.json({
+      message: "Problem updated successfully",
+      problem: updatedProblem,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+});
+
+// DELETE PROBLEM
+router.delete("/:id", adminAuth, async (req, res) => {
+  try {
+    const deletedProblem = await Problem.findByIdAndDelete(req.params.id);
+
+    if (!deletedProblem) {
+      return res.status(404).json({
+        message: "Problem not found",
+      });
+    }
+
+    res.json({
+      message: "Problem deleted successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
   }
 });
 
