@@ -226,15 +226,54 @@ router.put("/connect-wallet", async (req, res) => {
 
 
 // SEND RESET OTP
+// router.post("/forgot-password", async (req, res) => {
+//   try {
+//     const { email } = req.body;
+//     console.log("Forgot password request received:", email);
+// console.log("User found");
+// console.log("OTP saved");
+// console.log("Sending email...");
+// await sendOtpEmail(email, otp);
+// console.log("Email sent");
+
+//     if (!email) {
+//       return res.status(400).json({
+//         message: "Email is required",
+//       });
+//     }
+
+//     const user = await User.findOne({ email });
+
+//     if (!user) {
+//       return res.status(404).json({
+//         message: "User not found",
+//       });
+//     }
+
+//     const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+//     user.resetOtp = otp;
+//     user.resetOtpExpiry = Date.now() + 10 * 60 * 1000;
+
+//     await user.save();
+
+//     await sendOtpEmail(email, otp);
+
+//     res.json({
+//       message: "OTP sent to your email",
+//     });
+//   } catch (error) {
+//     res.status(500).json({
+//       message: error.message,
+//     });
+//   }
+// });
+
 router.post("/forgot-password", async (req, res) => {
   try {
     const { email } = req.body;
+
     console.log("Forgot password request received:", email);
-console.log("User found");
-console.log("OTP saved");
-console.log("Sending email...");
-await sendOtpEmail(email, otp);
-console.log("Email sent");
 
     if (!email) {
       return res.status(400).json({
@@ -250,20 +289,30 @@ console.log("Email sent");
       });
     }
 
+    console.log("User found");
+
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    console.log("OTP generated");
 
     user.resetOtp = otp;
     user.resetOtpExpiry = Date.now() + 10 * 60 * 1000;
 
     await user.save();
 
+    console.log("OTP saved");
+
     await sendOtpEmail(email, otp);
 
-    res.json({
+    console.log("Email sent");
+
+    return res.json({
       message: "OTP sent to your email",
     });
   } catch (error) {
-    res.status(500).json({
+    console.log("Forgot password error:", error.message);
+
+    return res.status(500).json({
       message: error.message,
     });
   }
