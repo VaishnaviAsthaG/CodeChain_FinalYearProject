@@ -229,6 +229,12 @@ router.put("/connect-wallet", async (req, res) => {
 router.post("/forgot-password", async (req, res) => {
   try {
     const { email } = req.body;
+    console.log("Forgot password request received:", email);
+console.log("User found");
+console.log("OTP saved");
+console.log("Sending email...");
+await sendOtpEmail(email, otp);
+console.log("Email sent");
 
     if (!email) {
       return res.status(400).json({
