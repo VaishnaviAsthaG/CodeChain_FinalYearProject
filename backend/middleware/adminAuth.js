@@ -10,7 +10,7 @@ const adminAuth = async (req, res, next) => {
         message: "No token provided",
       });
     }
-
+//jwt secret will be fetched
     const decoded = jwt.verify(
       token,
       process.env.JWT_SECRET
